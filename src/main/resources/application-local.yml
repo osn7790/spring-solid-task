@@ -51,4 +51,4 @@ notification:
 
 coolsms:
   apiKey: ${NCSYLLPBW8UUWD0S}
-  secretkey: ${UDHSIKOCDNJIGIOCMQYILEOLDZIUWKLZ}
+  secretkey:
