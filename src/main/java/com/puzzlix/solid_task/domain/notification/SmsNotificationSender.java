@@ -25,8 +25,8 @@ public void smsHelper() {
     DefaultMessageService messageService =  SolapiClient.INSTANCE.createInstance("시크릿키", "시크릿코드");
 
     Message message = new Message();
-    message.setFrom("01098562028");
-    message.setTo("01098562028");
+    message.setFrom("전화번호");
+    message.setTo("전화번호");
     message.setText("트랜잭션 에프터커밋 해야 문자가 갑니다.");
 
     try {
