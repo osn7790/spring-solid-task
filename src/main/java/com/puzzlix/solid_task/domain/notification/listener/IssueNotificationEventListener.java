@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
+
+import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Component
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class IssueNotificationEventListener {
     @Value("${notification.policy.on-status-done}")
     private String onStatusDoneType;
 
+    @TransactionalEventListener(phase = AFTER_COMMIT)
     @EventListener
     public void handleIssueStatusChangeEvent(IssueStatusChangedEvent event) {
         Issue issue = event.getIssue();

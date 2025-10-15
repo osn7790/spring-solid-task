@@ -1,6 +1,7 @@
 package com.puzzlix.solid_task.domain.issue;
 
 import com.puzzlix.solid_task.domain.issue.dto.IssueRequest;
+import com.puzzlix.solid_task.domain.issue.dto.IssueResponse;
 import com.puzzlix.solid_task.domain.issue.event.IssueStatusChangedEvent;
 import com.puzzlix.solid_task.domain.project.Project;
 import com.puzzlix.solid_task.domain.project.ProjectRepository;
@@ -28,23 +29,22 @@ public class IssueService {
     // 이 객체를 통해서 애플리케이션의 다른 부분에 "어떤 이벤트가 발생 했다" 라는 것을 알릴 수 있다.
     private final ApplicationEventPublisher eventPublisher;
 
-    public Issue updateIssueStatus(Long issueId, IssueStatus status, String requestUserEmail, Role userRole) {
-        // 인가 처리
+    public IssueResponse.FindById updateIssueStatus(Long issueId, IssueStatus status, String requestUserEmail) {
+        User user = userRepository.findByEmail(requestUserEmail)
+                .orElseThrow(() -> new NoSuchElementException("해당 유저를 찾을 수 없습니다"));
+
         Issue issue = issueRepository.findById(issueId)
                 .orElseThrow(() -> new NoSuchElementException("해당 ID의 이슈를 찾을 수 없습니다"));
 
-        // 관리자가 아니거나 담당자가 아니면 상태를 변경 못함
-        if(userRole != Role.ADMIN && !issue.getAssignee().getEmail().equals(requestUserEmail)) {
-            throw new SecurityException("이슈 상태를 변경할 권한이 없습니다");
-        }
-        // 더티 체킹 사용
-        issue.setIssueStatus(status);
-        if (status == IssueStatus.DONE) {
-            // 이벤트 발생 (방송)
-            eventPublisher.publishEvent(new IssueStatusChangedEvent(issue));
-        }
+        if(!user.getRole().equals(Role.ADMIN) && !issue.getAssignee().equals(user))
+            throw new SecurityException("관리자 또는 담당자만 수정 가능합니다.");
 
-        return issue;
+        issue.setIssueStatus(status);
+
+        if (status == IssueStatus.DONE)
+            eventPublisher.publishEvent(new IssueStatusChangedEvent(issue));
+
+        return new IssueResponse.FindById(issue);
     }
 
 

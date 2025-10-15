@@ -4,6 +4,10 @@ import com.puzzlix.solid_task._global.dto.CommonResponseDto;
 import com.puzzlix.solid_task.domain.issue.dto.IssueRequest;
 import com.puzzlix.solid_task.domain.issue.dto.IssueResponse;
 import com.puzzlix.solid_task.domain.user.Role;
+import com.solapi.sdk.SolapiClient;
+import com.solapi.sdk.message.exception.SolapiMessageNotReceivedException;
+import com.solapi.sdk.message.model.Message;
+import com.solapi.sdk.message.service.DefaultMessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,17 +28,12 @@ public class IssueController {
     //# URL의 {id} 부분에 수정할 이슈의 ID를, ?status= 뒤에 변경할 상태(TODO, IN_PROGRESS, DONE)를 입력합니다.
     //PATCH http://localhost:8080/api/issues/1/status?status=IN_PROGRESS
     //Authorization: Bearer {{loginToken}}
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<CommonResponseDto<IssueResponse.FindById>> updateIssueStatus(
-            @PathVariable Long id,
-            @RequestParam("status") IssueStatus newStatus,
-            @RequestAttribute("userEmail") String userEmail,
-            @RequestAttribute("userRole") Role userRole) {
-        Issue updatedIssue = issueService.updateIssueStatus(id, newStatus, userEmail, userRole);
+    @PatchMapping("/{issueId}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable("issueId") Long issueId,
+                                          @RequestParam("type") IssueStatus status,
+                                          @RequestAttribute("userEmail") String userEmail) {
 
-        // [핵심] Entity -> DTO로 변환하여 반환
-        IssueResponse.FindById responseDto = new IssueResponse.FindById(updatedIssue);
-        return ResponseEntity.ok(CommonResponseDto.success(responseDto, "이슈 상태가 성공적으로 변경되었습니다."));
+        return ResponseEntity.ok().body(CommonResponseDto.success(issueService.updateIssueStatus(issueId, status, userEmail)));
     }
 
     /**
@@ -97,6 +96,7 @@ public class IssueController {
         List<IssueResponse.FindAll> responseDtos = IssueResponse.FindAll.from(issues);
         return ResponseEntity.ok(CommonResponseDto.success(responseDtos));
     }
+
 
 }
 

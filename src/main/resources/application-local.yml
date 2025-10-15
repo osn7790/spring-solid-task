@@ -47,4 +47,8 @@ jwt:
 notification:
   policy:
     # 이슈 상태가 DONE 으로 변경되었을 때 사용할 알림 타입 지정
-    on-status-done: EMAIL
+    on-status-done: SMS
+
+coolsms:
+  apiKey: ${NCSYLLPBW8UUWD0S}
+  secretkey: ${UDHSIKOCDNJIGIOCMQYILEOLDZIUWKLZ}
