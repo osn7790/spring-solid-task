@@ -19,21 +19,22 @@ public class IssueController {
 
     private final IssueService issueService;
 
-    /**
-     * 특정 이슈 상태 변경 API (담당자가 진행 상태 변경 관리자도 진행 상태 변경)
-     *  주소 설계 - http://localhost:8080/api/issues/{id}/status
-     */
+    // ### 특정 이슈 상태 변경 (PATCH) - http 메세지 body 가질 수 있음
+    //# @name updateIssueStatus
+    //# URL의 {id} 부분에 수정할 이슈의 ID를, ?status= 뒤에 변경할 상태(TODO, IN_PROGRESS, DONE)를 입력합니다.
+    //PATCH http://localhost:8080/api/issues/1/status?status=IN_PROGRESS
+    //Authorization: Bearer {{loginToken}}
     @PatchMapping("/{id}/status")
-    public ResponseEntity<?> updateIssueStatus(
-            @PathVariable(name = "id") Long issueId,
+    public ResponseEntity<CommonResponseDto<IssueResponse.FindById>> updateIssueStatus(
+            @PathVariable Long id,
             @RequestParam("status") IssueStatus newStatus,
             @RequestAttribute("userEmail") String userEmail,
-            @RequestAttribute("userRole") Role userRole
-    ) {
-        Issue issue = issueService.updateIssueStatus(issueId, newStatus, userEmail, userRole);
-        // 서비스 호출
-        return ResponseEntity.ok(CommonResponseDto
-                .success(issue, "이슈 상태가 성공적으로 변경 되었습니다"));
+            @RequestAttribute("userRole") Role userRole) {
+        Issue updatedIssue = issueService.updateIssueStatus(id, newStatus, userEmail, userRole);
+
+        // [핵심] Entity -> DTO로 변환하여 반환
+        IssueResponse.FindById responseDto = new IssueResponse.FindById(updatedIssue);
+        return ResponseEntity.ok(CommonResponseDto.success(responseDto, "이슈 상태가 성공적으로 변경되었습니다."));
     }
 
     /**
@@ -66,7 +67,7 @@ public class IssueController {
         IssueResponse.FindById findByIdDto = new IssueResponse.FindById(issue);
         return ResponseEntity
                 .ok(CommonResponseDto.success(findByIdDto,
-                        "이슈가 성공작으로 변경 되었습니다"));
+                        "이슈가 성공적으로 변경 되었습니다"));
     }
 
 
